@@ -4,14 +4,34 @@ require("dotenv").config();
 require("express-async-errors");
 require("./lib/env-vars-checker");
 const session = require("express-session");
+const MongoDBStore = require("connect-mongodb-session")(session);
+const url = process.env.MONGO_URI;
 
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET,
-    resave: false,
-    saveUninitialized: true,
-  })
-);
+//todo ``** Left off on Flash Messages part of reading material **``
+
+const store = new MongoDBStore({
+  // may throw an error, which won't be caught
+  uri: url,
+  collection: "mySessions",
+});
+store.on("error", function (error) {
+  console.log(error);
+});
+
+const sessionParms = {
+  secret: process.env.SESSION_SECRET,
+  resave: true,
+  saveUninitialized: true,
+  store: store,
+  cookie: { secure: false, sameSite: "strict" },
+};
+
+if (app.get("env") === "production") {
+  app.set("trust proxy", 1); // trust first proxy
+  sessionParms.cookie.secure = true; // serve secure cookies
+}
+
+app.use(session(sessionParms));
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
