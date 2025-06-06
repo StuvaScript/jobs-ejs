@@ -7,6 +7,8 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const url = process.env.MONGO_URI;
 
+app.use(require("body-parser").urlencoded({ extended: true }));
+app.use(require("connect-flash")());
 const store = new MongoDBStore({
   // may throw an error, which won't be caught
   uri: url,
@@ -38,8 +40,6 @@ passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(require("connect-flash")());
-
 app.use(require("./middleware/storeLocals"));
 app.get("/", (req, res) => {
   res.render("index");
@@ -47,7 +47,6 @@ app.get("/", (req, res) => {
 app.use("/sessions", require("./routes/sessionRoutes"));
 
 app.set("view engine", "ejs");
-app.use(require("body-parser").urlencoded({ extended: true }));
 
 // secret word handling
 app.get("/secretWord", (req, res) => {
