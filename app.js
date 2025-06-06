@@ -7,8 +7,6 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const url = process.env.MONGO_URI;
 
-//todo ``** Left off on Flash Messages part of reading material **``
-
 const store = new MongoDBStore({
   // may throw an error, which won't be caught
   uri: url,
@@ -33,6 +31,12 @@ if (app.get("env") === "production") {
 
 app.use(session(sessionParms));
 app.use(require("connect-flash")());
+
+app.use(require("./middleware/storeLocals"));
+app.get("/", (req, res) => {
+  res.render("index");
+});
+app.use("/sessions", require("./routes/sessionRoutes"));
 
 app.set("view engine", "ejs");
 app.use(require("body-parser").urlencoded({ extended: true }));
