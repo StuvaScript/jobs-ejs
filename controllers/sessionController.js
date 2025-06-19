@@ -1,5 +1,6 @@
 const User = require("../models/User");
 const parseVErr = require("../util/parseValidationErrs");
+const csrf = require("host-csrf");
 
 const registerShow = (req, res) => {
   res.render("register");
@@ -38,7 +39,8 @@ const logonShow = (req, res) => {
   if (req.user) {
     return res.redirect("/");
   }
-  res.render("logon");
+  const token = csrf.token(req, res);
+  res.render("logon", { _csrf: token });
 };
 
 module.exports = {
