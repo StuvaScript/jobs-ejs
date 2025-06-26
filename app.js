@@ -12,6 +12,20 @@ const passport = require("passport");
 const passportInit = require("./passport/passportInit");
 const csrf = require("host-csrf");
 const cookieParser = require("cookie-parser");
+const exerciseRoutes = require("./routes/exercises");
+const helmet = require("helmet");
+const xss = require("xss-clean");
+const rateLimit = require("express-rate-limit");
+
+// Security
+app.use(helmet());
+app.use(xss());
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+app.use(limiter);
 
 const store = new MongoDBStore({
   // may throw an error, which won't be caught
@@ -56,8 +70,8 @@ const csrf_options = {
 const csrf_middleware = csrf(csrf_options); //initialize and return middleware
 
 // app.use(csrf_middleware(req, res, next));
-app.use(csrf_middleware);
 app.use(session(sessionParms));
+app.use(csrf_middleware);
 
 passportInit();
 app.use(passport.initialize());
@@ -68,11 +82,21 @@ app.get("/", (req, res) => {
   res.render("index");
 });
 app.use("/sessions", require("./routes/sessionRoutes"));
+app.use("/exercises", auth, exerciseRoutes);
 
 app.set("view engine", "ejs");
 
 // secret word handling
 app.use("/secretWord", auth, secretWordRouter);
+
+app.use((req, res, next) => {
+  console.log("Session ID:", req.sessionID);
+  console.log(
+    "Session User:",
+    req.session.passport && req.session.passport.user
+  );
+  next();
+});
 
 app.use((req, res) => {
   res.status(404).send(`That page (${req.url}) was not found.`);

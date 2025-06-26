@@ -12,7 +12,14 @@ const registerDo = async (req, res, next) => {
     return res.render("register", { errors: req.flash("error") });
   }
   try {
-    await User.create(req.body);
+    const user = await User.create(req.body);
+
+    req.login(user, (err) => {
+      if (err) {
+        return next(err);
+      }
+      res.redirect("/");
+    });
   } catch (e) {
     if (e.constructor.name === "ValidationError") {
       parseVErr(e, req);
@@ -23,7 +30,6 @@ const registerDo = async (req, res, next) => {
     }
     return res.render("register", { errors: req.flash("error") });
   }
-  res.redirect("/");
 };
 
 const logoff = (req, res) => {

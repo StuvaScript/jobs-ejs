@@ -1,0 +1,41 @@
+<%- include("partials/head.ejs") %> <%- include("partials/header.ejs") %>
+
+<h2>Exercises List</h2>
+<a href="/exercises/new"><button>Add New Exercise</button></a>
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Sets</th>
+    <th>Reps</th>
+    <th>Measurement</th>
+    <th>Measurement Unit</th>
+    <th colspan="2"></th>
+  </tr>
+  <% if (exercises && exercises.length) { %> <% exercises.forEach(exercise => {
+  %>
+  <tr>
+    <td><%= exercise.name %></td>
+    <td><%= exercise.sets %></td>
+    <td><%= exercise.reps %></td>
+    <td><%= exercise.measurement %></td>
+    <td><%= exercise.measurementUnit %></td>
+    <td>
+      <a href="/exercises/edit/<%= exercise._id %>"
+        ><button type="button">Edit</button></a
+      >
+    </td>
+    <td>
+      <form method="POST" action="/exercises/delete/<%= exercise._id %>">
+        <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+        <button>Delete</button>
+      </form>
+    </td>
+  </tr>
+  <% }) %> <% } else { %>
+  <tr>
+    <td colspan="7">No exercises found.</td>
+  </tr>
+  <% } %>
+</table>
+
+<%- include("partials/footer.ejs") %>
