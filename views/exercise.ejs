@@ -1,0 +1,36 @@
+<%- include("partials/head.ejs") %>
+<%- include("partials/header.ejs") %>
+
+<form method="POST" action="<%= exercise ? `/exercises/update/${exercise._id}` : '/exercises' %>">
+  <input type="hidden" name="_csrf" value="<%= _csrf %>" />
+
+  <div>
+    <label for="name">Exercise Name:</label>
+    <input type="text" id="name" name="name" value="<%= exercise ? exercise.name : '' %>" required />
+  </div>
+
+  <div>
+    <label for="sets">Sets:</label>
+    <input type="number" id="sets" name="sets" value="<%= exercise ? exercise.sets : '' %>" />
+  </div>
+
+  <div>
+    <label for="reps">Reps:</label>
+    <input type="number" id="reps" name="reps" value="<%= exercise ? exercise.reps : '' %>" />
+  </div>
+
+  <div>
+    <label for="measurement">Measurement:</label>
+    <input type="number" id="measurement" name="measurement" value="<%= exercise ? exercise.measurement : '' %>" required />
+  </div>
+
+  <div>
+    <label for="measurementUnit">Measurement Unit:</label>
+    <input type="text" id="measurementUnit" name="measurementUnit" value="<%= exercise ? exercise.measurementUnit : '' %>" required />
+  </div>
+
+  <button><%= exercise ? "Update" : "Add" %> Exercise</button>
+  <a href="/exercises"><button type="button">Cancel</button></a>
+</form>
+
+<%- include("partials/footer.ejs") %>
