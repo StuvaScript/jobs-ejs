@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "test": "NODE_ENV=test mocha tests/*.js --timeout 5000 --exit"
   },
   "repository": {
     "type": "git",
@@ -21,7 +22,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "connect-flash": "^0.1.1",
-    "connect-mongodb-session": "^5.0.0",
+    "connect-mongodb-session": "^3.1.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "ejs": "^3.1.10",
@@ -29,14 +30,22 @@
     "express-async-errors": "^3.1.1",
     "express-rate-limit": "^7.5.0",
     "express-session": "^1.18.1",
-    "helmet": "^8.1.0",
+    "helmet": "^5.1.1",
     "host-csrf": "^1.0.2",
-    "mongoose": "^8.15.1",
+    "mongoose": "^6.13.8",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "@faker-js/faker": "^9.8.0",
+    "chai": "^5.2.0",
+    "chai-http": "^5.1.2",
+    "factory-bot": "^6.3.1",
+    "install": "^0.13.0",
+    "mocha": "^11.7.1",
+    "nodemon": "^3.1.10",
+    "npm": "^11.4.2",
+    "puppeteer": "^24.11.1"
   }
 }

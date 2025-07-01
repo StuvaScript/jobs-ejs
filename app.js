@@ -5,7 +5,7 @@ require("express-async-errors");
 require("./lib/env-vars-checker");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
-const url = process.env.MONGO_URI;
+// const url = process.env.MONGO_URI;
 const secretWordRouter = require("./routes/secretWord");
 const auth = require("./middleware/auth");
 const passport = require("passport");
@@ -16,6 +16,12 @@ const exerciseRoutes = require("./routes/exercises");
 const helmet = require("helmet");
 const xss = require("xss-clean");
 const rateLimit = require("express-rate-limit");
+
+//* **`` Testing ``**
+let mongoURL = process.env.MONGO_URI;
+if (process.env.NODE_ENV == "test") {
+  mongoURL = process.env.MONGO_URI_TEST;
+}
 
 // Security
 app.use(helmet());
@@ -29,7 +35,7 @@ app.use(limiter);
 
 const store = new MongoDBStore({
   // may throw an error, which won't be caught
-  uri: url,
+  uri: mongoURL,
   collection: "mySessions",
 });
 store.on("error", function (error) {
@@ -54,9 +60,13 @@ if (app.get("env") === "production") {
 // CSRF
 app.use(cookieParser(process.env.SESSION_SECRET));
 app.use(express.urlencoded({ extended: false }));
-let csrf_development_mode = true;
-if (app.get("env") === "production") {
-  csrf_development_mode = false;
+// let csrf_development_mode = true;
+// if (app.get("env") === "production") {
+//   csrf_development_mode = false;
+//   app.set("trust proxy", 1);
+// }
+let csrf_development_mode = app.get("env") !== "production";
+if (!csrf_development_mode) {
   app.set("trust proxy", 1);
 }
 
@@ -76,6 +86,27 @@ app.use(csrf_middleware);
 passportInit();
 app.use(passport.initialize());
 app.use(passport.session());
+
+//* **`` Testing Middleware ``**
+app.use((req, res, next) => {
+  if (req.path == "/multiply") {
+    res.set("Content-Type", "application/json");
+  } else {
+    res.set("Content-Type", "text/html");
+  }
+  next();
+});
+
+//* **`` API Testing ``**
+app.get("/multiply", (req, res) => {
+  const result = req.query.first * req.query.second;
+  if (result.isNaN) {
+    result = "NaN";
+  } else if (result == null) {
+    result = "null";
+  }
+  res.json({ result: result });
+});
 
 app.use(require("./middleware/storeLocals"));
 app.get("/", (req, res) => {
@@ -99,12 +130,7 @@ app.use((req, res, next) => {
 });
 
 app.use((req, res) => {
-  res.status(404).send(`That page (${req.url}) was not found.`);
-});
-
-app.use((err, req, res, next) => {
-  res.status(500).send(err.message);
-  console.log(err);
+  res.status(404).send(`That page (${req.mongoURL}) was not found.`);
 });
 
 app.use((err, req, res, next) => {
@@ -116,11 +142,16 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+app.use((err, req, res, next) => {
+  res.status(500).send(err.message);
+  console.log(err);
+});
+
 const port = process.env.PORT || 3000;
 
 const start = async () => {
   try {
-    await require("./db/connect")(process.env.MONGO_URI);
+    await require("./db/connect")(mongoURL);
     app.listen(port, () =>
       console.log(`Server is listening on port ${port}...`)
     );
@@ -129,4 +160,9 @@ const start = async () => {
   }
 };
 
-start();
+// start();
+if (process.env.NODE_ENV !== "test") {
+  start();
+}
+
+module.exports = { app };
