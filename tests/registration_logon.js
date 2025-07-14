@@ -11,7 +11,7 @@ describe("tests for registration and logon", function () {
   // });
   it("should get the registration page", async () => {
     const { expect, request } = await get_chai();
-    const req = request.execute(app).get("/session/register").send();
+    const req = request.execute(app).get("/sessions/register").send();
     const res = await req;
     expect(res).to.have.status(200);
     expect(res).to.have.property("text");
@@ -42,7 +42,7 @@ describe("tests for registration and logon", function () {
     };
     const req = request
       .execute(app)
-      .post("/session/register")
+      .post("/sessions/register")
       .set("Cookie", this.csrfCookie)
       .set("content-type", "application/x-www-form-urlencoded")
       .send(dataToPost);
